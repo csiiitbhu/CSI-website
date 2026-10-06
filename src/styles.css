@@ -1,0 +1,21 @@
+@import "tailwindcss";
+/* Semantic design tokens: change colors here */
+@theme {
+  --color-background: #faf7f0;
+  --color-foreground: #14302b;
+  --color-primary: #1f7a5c;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #0f766e;
+  --color-muted: #e9efe6;
+  --color-muted-foreground: #4d6660;
+  --color-card: #ffffff;
+  --color-border: #d8e2d6;
+  --shadow-soft: 0 6px 24px -8px rgb(20 48 43 / 0.15);
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+body { background: var(--color-background); color: var(--color-foreground); font-family: var(--font-sans); }
+html { scroll-behavior: smooth; }
+:focus-visible { outline: 2px solid var(--color-secondary); outline-offset: 2px; }
+@keyframes pop { from { opacity: 0; transform: scale(.97) } to { opacity: 1; transform: none } }
+.pop { animation: pop .2s ease-out; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
