@@ -16,5 +16,6 @@ export const site = {
     { to: '/our-team', label: 'Our Team' },
     { to: '/events', label: 'Events' },
     { to: '/gallery', label: 'Gallery' },
+    { label: 'Achievements', to: '/achievements' },
   ] as const,
 }
