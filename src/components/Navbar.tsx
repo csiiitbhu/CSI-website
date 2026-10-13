@@ -3,6 +3,8 @@ import { Link } from '@tanstack/react-router'
 import { Menu, X } from 'lucide-react'
 import { site } from '../data/site'
 import PlaceholderImage from './PlaceholderImage'
+import bulb from "../assets/bulb.svg";
+import spinner from "../assets/spinner.svg";
 export default function Navbar() {
   const [open, setOpen] = useState(false)
   const link = 'rounded-lg px-3 py-2 text-sm font-medium transition hover:bg-muted'
@@ -15,7 +17,18 @@ export default function Navbar() {
     <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6" aria-label="Main">
         <Link to="/" className="flex items-center gap-3 font-semibold text-primary">
-          <PlaceholderImage round label="" className="size-9 shrink-0" />
+          <div className="relative size-9 shrink-0">
+            <img
+              src={bulb}
+              alt=""
+              className="absolute inset-0 size-full object-contain"
+            />
+            <img
+              src={spinner}
+              alt=""
+              className="absolute left-[27%] top-[12%] size-4 max-w-none object-contain"
+            />
+          </div>
           <span className="text-sm sm:text-base">{site.name}</span>
         </Link>
         <div className="hidden gap-1 md:flex">{links}</div>
