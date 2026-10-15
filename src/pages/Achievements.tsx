@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowDown, ArrowUpRight, Sparkles, Sun, Moon, CheckCircle2 } from 'lucide-react';
+import { ArrowDown, ArrowUpRight, Sparkles, CheckCircle2 } from 'lucide-react';
 
 const dummyAchievements = [
   {
@@ -11,7 +11,7 @@ const dummyAchievements = [
       "We engineered a full-stack green-tech geospatial architecture with interactive 3D map visualizations, placing in the top 1% out of 50,000+ teams nationwide.",
     badge: "🏆 Top 1% Nationwide",
     metrics: ["3D WebGIS Engine", "MERN Architecture", "National Finale"],
-    bgColor: "bg-[#a84315]", // Warm Terracotta from video
+    bgColor: "bg-[#285943]", // Muted Deep Forest Green
     image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1000&q=80",
   },
   {
@@ -23,7 +23,7 @@ const dummyAchievements = [
       "Awarded 1st Place and a ₹1,00,000 innovation grant at the Eco-Innovate National Summit for designing an automated IoT & AI energy optimization blueprint.",
     badge: "🥇 1st Place Winner",
     metrics: ["₹1,00,000 Grant", "24% Energy Saved", "IoT + AI Grid"],
-    bgColor: "bg-[#0d6e52]", // Deep Forest Emerald from video
+    bgColor: "bg-[#7a4b3a]", // Muted Earthy Rust/Terracotta
     image: "https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?auto=format&fit=crop&w=1000&q=80",
   },
   {
@@ -35,7 +35,7 @@ const dummyAchievements = [
       "We paired bold gamification with a real-time betting quiz and live leaderboard at the freshman induction stall, engaging over 500+ students simultaneously.",
     badge: "⚡ 500+ Live Players",
     metrics: ["Highest Stall Footfall", "Zero-Latency Sync", "Best Club Stall"],
-    bgColor: "bg-[#d6006e]", // Vibrant Magenta from video
+    bgColor: "bg-[#37474f]", // Muted Slate Blue
     image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1000&q=80",
   },
   {
@@ -47,7 +47,7 @@ const dummyAchievements = [
       "An approachable deep-learning atmospheric model turns live climate telemetry into actionable environmental warnings with 96.8% validation accuracy.",
     badge: "🌟 Best Research Model",
     metrics: ["96.8% Precision", "Open-Source Dataset", "Climate-AI"],
-    bgColor: "bg-[#3b28cc]", // Royal Indigo from video
+    bgColor: "bg-[#59573a]", // Muted Olive/Khaki
     image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1000&q=80",
   },
   {
@@ -59,7 +59,7 @@ const dummyAchievements = [
       "Spearheaded a month-long electronic waste collection and hardware upcycling marathon across 12 hostels, earning UN SDG Youth Changemaker recognition.",
     badge: "🌍 UN SDG Recognized",
     metrics: ["400kg+ E-Waste Recycled", "12 Hostels Covered", "Hardware Upcycling"],
-    bgColor: "bg-[#143d59]", // Deep Slate Blue
+    bgColor: "bg-[#3e332d]", // Muted Espresso/Brown
     image: "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=1000&q=80",
   },
 ];
@@ -67,7 +67,6 @@ const dummyAchievements = [
 const Achievements = () => {
   const stackContainerRef = useRef<HTMLDivElement>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [darkMode, setDarkMode] = useState(false); // Defaults to the exact cream look from the video
 
   useEffect(() => {
     let animationFrameId: number;
@@ -98,12 +97,10 @@ const Achievements = () => {
   }, []);
 
   const totalCards = dummyAchievements.length;
-  // Ranges from 0 to (totalCards - 1) as user scrolls through the sticky zone
   const activeFloat = scrollProgress * (totalCards - 1);
   const currentCardIndex = Math.min(totalCards - 1, Math.round(activeFloat));
 
-  // Jump smoothly to a specific card in the stack when clicking a pagination dot
-  const scrollToCard = (index : number) => {
+  const scrollToCard = (index: number) => {
     if (!stackContainerRef.current) return;
     const rect = stackContainerRef.current.getBoundingClientRect();
     const containerTop = window.scrollY + rect.top;
@@ -114,63 +111,26 @@ const Achievements = () => {
   };
 
   return (
-    <div
-      className={`min-h-screen transition-colors duration-500 font-sans ${
-        darkMode ? 'bg-[#070709] text-zinc-100' : 'bg-[#f4f1ea] text-zinc-900'
-      }`}
-    >
-      {/* --- FLOATING THEME TOGGLE --- */}
-      <button
-        onClick={() => setDarkMode(!darkMode)}
-        className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-semibold shadow-lg border backdrop-blur-md transition-all ${
-          darkMode
-            ? 'bg-zinc-900/90 border-zinc-700 text-zinc-200 hover:bg-zinc-800'
-            : 'bg-white/90 border-zinc-300 text-zinc-800 hover:bg-white'
-        }`}
-      >
-        {darkMode ? <Sun size={15} className="text-amber-400" /> : <Moon size={15} className="text-zinc-700" />}
-        <span>{darkMode ? 'Editorial Light' : 'Cyber Dark'}</span>
-      </button>
-
-      {/* --- 1. INTRO SCREEN ("Design That Delivers." equivalent) --- */}
+    <div className="min-h-screen transition-colors duration-500 font-sans bg-background text-foreground">
+      {/* --- 1. INTRO SCREEN --- */}
       <section className="h-[85vh] w-full flex flex-col items-center justify-between py-12 px-4 relative">
-        {/* Top "Scroll Down" Indicator */}
-        <div
-          className={`flex items-center gap-3 text-base md:text-lg font-medium tracking-tight ${
-            darkMode ? 'text-zinc-400' : 'text-zinc-800'
-          }`}
-        >
+        <div className="flex items-center gap-3 text-base md:text-lg font-medium tracking-tight text-foreground">
           <ArrowDown size={18} className="animate-bounce" />
           <span>Scroll Down</span>
           <ArrowDown size={18} className="animate-bounce" />
         </div>
 
-        {/* Center Impact Headline */}
         <div className="text-center max-w-4xl mx-auto my-auto">
-          <div
-            className={`inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-semibold uppercase tracking-widest mb-6 border ${
-              darkMode
-                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                : 'bg-[#a84315]/10 border-[#a84315]/25 text-[#a84315]'
-            }`}
-          >
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-6 bg-muted text-primary border border-border">
             <Sparkles size={13} />
             <span>Club of Sustainability & Innovation</span>
           </div>
 
-          <h1
-            className={`text-5xl sm:text-7xl md:text-8xl font-extrabold tracking-tight leading-[1.02] ${
-              darkMode ? 'text-white' : 'text-[#a84315]'
-            }`}
-          >
+          <h1 className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tight leading-[1.02] text-foreground">
             Innovation That Delivers.
           </h1>
 
-          <p
-            className={`mt-6 text-base md:text-xl max-w-xl mx-auto font-normal ${
-              darkMode ? 'text-zinc-400' : 'text-zinc-600'
-            }`}
-          >
+          <p className="mt-6 text-base md:text-xl max-w-xl mx-auto font-normal text-muted-foreground">
             Scroll through our national hackathon victories, research breakthroughs, and campus-wide sustainability deployments.
           </p>
         </div>
@@ -195,12 +155,8 @@ const Achievements = () => {
                 title={item.title}
                 className={`w-2.5 rounded-full transition-all duration-300 ${
                   currentCardIndex === idx
-                    ? darkMode
-                      ? 'h-8 bg-emerald-400'
-                      : 'h-8 bg-[#a84315]'
-                    : darkMode
-                    ? 'h-2.5 bg-zinc-700 hover:bg-zinc-500'
-                    : 'h-2.5 bg-zinc-300 hover:bg-zinc-500'
+                    ? 'h-8 bg-primary'
+                    : 'h-2.5 bg-border hover:bg-muted-foreground'
                 }`}
               />
             ))}
@@ -209,21 +165,17 @@ const Achievements = () => {
           {/* The Deck Container */}
           <div className="relative w-full max-w-[1140px] h-[540px] sm:h-[560px] md:h-[540px]">
             {dummyAchievements.map((card, index) => {
-              // Relative position of this card in the scroll sequence
               const cardProgress = activeFloat - index;
-
               let translateY = '0px';
               let scale = 1;
 
               if (cardProgress > 0) {
-                // Card is peeling UP and off the top of the stack as user scrolls down
                 const peelPercent = Math.min(cardProgress, 1.3) * 118;
                 translateY = `-${peelPercent}%`;
                 scale = 1;
               } else {
-                // Card is waiting underneath in the deck — peek its bottom edge out!
                 const depth = Math.max(0, -cardProgress);
-                const peekOffsetPx = depth * 18; // 18px bottom strip per card underneath
+                const peekOffsetPx = depth * 18; 
                 scale = Math.max(0.88, 1 - depth * 0.025);
                 translateY = `${peekOffsetPx}px`;
               }
@@ -237,44 +189,39 @@ const Achievements = () => {
                     transformOrigin: 'bottom center',
                     willChange: 'transform',
                   }}
-                  className={`absolute inset-0 w-full h-full ${card.bgColor} text-white rounded-[2rem] md:rounded-[2.5rem] p-6 sm:p-10 md:p-12 shadow-[0_25px_60px_rgba(0,0,0,0.28)] border-2 border-white/20 flex flex-col md:flex-row gap-6 md:gap-10 justify-between overflow-hidden select-none`}
+                  className={`absolute inset-0 w-full h-full ${card.bgColor} text-primary-foreground rounded-[2rem] md:rounded-[2.5rem] p-6 sm:p-10 md:p-12 shadow-soft flex flex-col md:flex-row gap-6 md:gap-10 justify-between overflow-hidden select-none border border-white/10`}
                 >
-                  {/* --- LEFT COLUMN: NUMBER + TEXT CONTENT --- */}
+                  {/* Left Column */}
                   <div className="w-full md:w-[54%] flex flex-col justify-between h-full z-10">
-                    {/* Top Index Number ("01", "02"...) */}
                     <div className="flex items-center justify-between">
-                      <span className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-white/95">
+                      <span className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-white/95">
                         {card.number}
                       </span>
-
-                      <span className="inline-flex items-center gap-1.5 text-xs font-bold bg-black/25 backdrop-blur-md border border-white/20 px-3.5 py-1.5 rounded-full">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-bold bg-white text-zinc-900 px-3.5 py-1.5 rounded-full shadow-sm">
                         {card.badge}
                       </span>
                     </div>
 
-                    {/* Bottom Editorial Stack */}
                     <div className="my-auto md:my-0 pt-2">
-                      <div className="text-xs sm:text-sm font-semibold uppercase tracking-[0.16em] text-white/90">
+                      <div className="text-xs sm:text-sm font-bold uppercase tracking-[0.16em] text-white/90">
                         {card.category}
                       </div>
 
-                      {/* Thin Divider Line from Video */}
-                      <div className="w-full h-[1px] bg-white/35 my-3 sm:my-4"></div>
+                      <div className="w-full h-[1px] bg-white/20 my-3 sm:my-4"></div>
 
                       <h2 className="text-2xl sm:text-4xl lg:text-[2.65rem] font-bold tracking-tight leading-[1.08] mb-3 sm:mb-4 text-white">
                         {card.title}
                       </h2>
 
-                      <p className="text-xs sm:text-sm md:text-base text-white/85 leading-relaxed font-normal max-w-xl mb-5">
+                      <p className="text-xs sm:text-sm md:text-base text-white/80 leading-relaxed font-normal max-w-xl mb-5">
                         {card.description}
                       </p>
 
-                      {/* Key Impact Pills */}
                       <div className="hidden sm:flex flex-wrap gap-2">
                         {card.metrics.map((m, i) => (
                           <span
                             key={i}
-                            className="inline-flex items-center gap-1.5 text-xs font-medium bg-white/15 backdrop-blur-sm border border-white/20 px-3 py-1 rounded-full text-white"
+                            className="inline-flex items-center gap-1.5 text-xs font-semibold bg-white/10 px-3 py-1 rounded-full text-white border border-white/10"
                           >
                             <CheckCircle2 size={12} />
                             {m}
@@ -284,14 +231,13 @@ const Achievements = () => {
                     </div>
                   </div>
 
-                  {/* --- RIGHT COLUMN: FRAMED VISUAL IMAGE --- */}
+                  {/* Right Column */}
                   <div className="w-full md:w-[44%] h-44 sm:h-56 md:h-full rounded-[1.5rem] md:rounded-[1.8rem] overflow-hidden relative bg-black/20 shrink-0 shadow-inner">
                     <img
                       src={card.image}
                       alt={card.title}
                       className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
                   </div>
                 </div>
               );
@@ -301,31 +247,19 @@ const Achievements = () => {
         </div>
       </section>
 
-      {/* --- 3. OUTRO SECTION ("The End" equivalent) --- */}
+      {/* --- 3. OUTRO SECTION --- */}
       <section className="h-[75vh] w-full flex flex-col items-center justify-center px-4 text-center">
-        <p
-          className={`text-xs font-mono uppercase tracking-[0.25em] mb-3 ${
-            darkMode ? 'text-zinc-500' : 'text-zinc-500'
-          }`}
-        >
+        <p className="text-xs font-bold uppercase tracking-[0.25em] mb-3 text-muted-foreground">
           CSI // MILESTONE ARCHIVE COMPLETE
         </p>
 
-        <h2
-          className={`text-6xl sm:text-8xl font-extrabold tracking-tight mb-8 ${
-            darkMode ? 'text-white' : 'text-zinc-900'
-          }`}
-        >
+        <h2 className="text-6xl sm:text-8xl font-black tracking-tight mb-8 text-foreground">
           The End
         </h2>
 
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className={`inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold transition-transform hover:scale-105 ${
-            darkMode
-              ? 'bg-emerald-500 text-zinc-950'
-              : 'bg-[#a84315] text-white shadow-lg'
-          }`}
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold transition-transform hover:scale-105 bg-primary text-primary-foreground shadow-soft"
         >
           <span>Replay Stack</span>
           <ArrowUpRight size={16} />
