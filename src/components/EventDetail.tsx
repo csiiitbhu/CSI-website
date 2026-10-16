@@ -1,20 +1,24 @@
-import { MapPin, Calendar, Clock, ArrowUp } from 'lucide-react'
+import { useState } from 'react'
+import { Link } from '@tanstack/react-router'
+import { MapPin, Calendar, Clock, ChevronDown, Ticket, Users, ListChecks, Info } from 'lucide-react'
 import { categoryColor, isUpcoming, type CsiEvent } from '../data/events'
 
 // Full write-up for one event. The id is the anchor the orbit scrolls to.
-export default function EventDetail({ ev, index, flash, onTop }: { ev: CsiEvent; index: number; flash: boolean; onTop: () => void }) {
+export default function EventDetail({ ev, index, flash }: { ev: CsiEvent; index: number; flash: boolean }) {
+  const [open, setOpen] = useState(false)
   const color = categoryColor[ev.category]
   const flip = index % 2 === 1
   const soon = isUpcoming(ev)
+  const panelId = `more-${ev.id}`
   return (
     <article id={`event-${ev.id}`} className={`scroll-mt-24 rounded-3xl border bg-card p-4 shadow-soft transition-all duration-500 sm:p-6 ${flash ? 'border-primary ring-4 ring-primary/25' : 'border-border'}`}>
       <div className={`grid items-center gap-6 md:grid-cols-2 md:gap-10 ${flip ? 'md:[&>*:first-child]:order-2' : ''}`}>
-        <div className="relative aspect-[4/3] overflow-hidden rounded-2xl" style={{ background: `linear-gradient(135deg,#0f5a3f,${color})` }}>
+        <div className="relative aspect-[4/3] overflow-hidden rounded-2xl" style={{ background: 'linear-gradient(135deg, var(--color-primary), color-mix(in srgb, var(--color-secondary) 55%, white))' }}>
           {ev.image
             ? <img src={ev.image} alt={ev.title} className="size-full object-cover" loading="lazy" />
-            : <svg viewBox="0 0 200 150" className="size-full" aria-hidden="true"><g fill="none" stroke="#03120e" strokeOpacity=".35"><circle cx="130" cy="75" r="22" /><circle cx="130" cy="75" r="44" /><circle cx="130" cy="75" r="66" /></g></svg>}
-          <span className="absolute left-4 top-4 rounded-full bg-[#03120e] px-3 py-1 text-xs font-semibold" style={{ color }}>{ev.category}</span>
-          {soon && <span className="absolute right-4 top-4 rounded-full bg-[#b8f35a] px-3 py-1 text-xs font-bold text-[#03120e]">Upcoming</span>}
+            : <svg viewBox="0 0 200 150" className="size-full" aria-hidden="true"><g fill="none" stroke="white" strokeOpacity=".5"><circle cx="130" cy="75" r="22" /><circle cx="130" cy="75" r="44" /><circle cx="130" cy="75" r="66" /></g></svg>}
+          <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-card px-3 py-1 text-xs font-bold text-foreground shadow-soft"><span className="size-2 rounded-full" style={{ background: color }} aria-hidden="true" />{ev.category}</span>
+          {soon && <span className="absolute right-4 top-4 rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground">Upcoming</span>}
           <span className="absolute bottom-3 right-4 select-none text-6xl font-black text-white/25">{String(index + 1).padStart(2, '0')}</span>
         </div>
         <div>
@@ -33,11 +37,44 @@ export default function EventDetail({ ev, index, flash, onTop }: { ev: CsiEvent;
               </li>
             ))}
           </ul>
-          <div className="mt-6 flex flex-wrap gap-2">
-          {soon && ev.registerUrl && <a href={ev.registerUrl} className="rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90">Register</a>}
-          <button onClick={onTop} className="inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-sm font-medium text-primary transition hover:bg-muted">
-            <ArrowUp className="size-4" aria-hidden="true" />Back to orbit
-          </button>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} aria-controls={panelId}
+              className="inline-flex items-center gap-2 rounded-full border-2 border-primary px-5 py-2.5 text-sm font-bold text-primary transition hover:bg-primary hover:text-primary-foreground">
+              {open ? 'Show less' : 'Know more'}<ChevronDown className={`size-4 transition-transform duration-300 ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
+            </button>
+            {soon ? (
+              <Link to="/events/$eventId/register" params={{ eventId: ev.id }}
+                className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground shadow-soft transition hover:-translate-y-0.5 hover:opacity-90">
+                <Ticket className="size-4" aria-hidden="true" />Register
+              </Link>
+            ) : (
+              <span className="inline-flex items-center gap-2 rounded-full bg-muted px-6 py-2.5 text-sm font-bold text-muted-foreground"><Ticket className="size-4" aria-hidden="true" />Registration closed</span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div id={panelId} inert={!open} className={`grid transition-[grid-template-rows] duration-300 ease-out ${open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>
+        <div className="overflow-hidden">
+          <div className="mt-6 grid gap-4 border-t border-border pt-6 md:grid-cols-3">
+            <div className="rounded-2xl bg-muted p-4">
+              <h4 className="flex items-center gap-2 text-sm font-bold text-foreground"><Info className="size-4 text-primary" aria-hidden="true" />Quick facts</h4>
+              <dl className="mt-3 space-y-2 text-sm">
+                <div><dt className="text-xs uppercase tracking-wider text-muted-foreground">Type</dt><dd className="font-semibold text-foreground">{ev.category}</dd></div>
+                <div><dt className="text-xs uppercase tracking-wider text-muted-foreground">Date</dt><dd className="font-semibold text-foreground">{ev.dateLabel}{ev.time ? `, ${ev.time}` : ''}</dd></div>
+                <div><dt className="text-xs uppercase tracking-wider text-muted-foreground">Venue</dt><dd className="font-semibold text-foreground">{ev.venue}</dd></div>
+              </dl>
+            </div>
+            <div className="rounded-2xl bg-muted p-4">
+              <h4 className="flex items-center gap-2 text-sm font-bold text-foreground"><Users className="size-4 text-primary" aria-hidden="true" />Who can join</h4>
+              <p className="mt-3 text-sm text-muted-foreground">{ev.audience ?? 'Open to all students.'}</p>
+            </div>
+            <div className="rounded-2xl bg-muted p-4">
+              <h4 className="flex items-center gap-2 text-sm font-bold text-foreground"><ListChecks className="size-4 text-primary" aria-hidden="true" />What to expect</h4>
+              {ev.agenda?.length
+                ? <ol className="mt-3 space-y-2 text-sm text-muted-foreground">{ev.agenda.map((a, i) => <li key={a} className="flex gap-2.5"><span className="font-bold text-primary">{i + 1}.</span>{a}</li>)}</ol>
+                : <p className="mt-3 text-sm text-muted-foreground">Details will be shared with registered participants.</p>}
+            </div>
           </div>
         </div>
       </div>
