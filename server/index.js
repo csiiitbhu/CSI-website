@@ -1,46 +1,39 @@
-// Registration backend: Express + SQLite. All registrations are stored in server/data/registrations.db
+// Registration backend: Express + MongoDB. All registrations are stored in your MongoDB database (collection "registrations").
 //   POST /api/registrations      public, saves one registration and returns its reference number
 //   GET  /api/registrations      admin only (header x-admin-key), optional ?eventId=...
 //   GET  /api/registrations.csv  admin only, download as CSV (opens in Excel / Google Sheets)
+//
+// Environment variables:
+//   MONGODB_URI   required, your MongoDB Atlas connection string
+//   MONGODB_DB    optional, database name (default "csi")
+//   ADMIN_KEY     password for the admin endpoints (without it they stay disabled)
+//   CORS_ORIGIN   optional, comma-separated site addresses allowed to call the API (only if the site is on another domain)
+//   PORT          optional (default 4000)
 import express from 'express'
 import cors from 'cors'
-import { DatabaseSync } from 'node:sqlite' // built into Node 22.13+, nothing to compile
+import { MongoClient } from 'mongodb'
 import crypto from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import dns from 'node:dns'
+dns.setServers(['8.8.8.8', '1.1.1.1'])
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const PORT = Number(process.env.PORT) || 4000
 const ADMIN_KEY = process.env.ADMIN_KEY || ''
 const ORIGINS = (process.env.CORS_ORIGIN || '').split(',').map((s) => s.trim()).filter(Boolean)
 
-fs.mkdirSync(path.join(__dirname, 'data'), { recursive: true })
-const db = new DatabaseSync(path.join(__dirname, 'data', 'registrations.db'))
-db.exec(`
-  CREATE TABLE IF NOT EXISTS registrations (
-    id           INTEGER PRIMARY KEY AUTOINCREMENT,
-    ref          TEXT NOT NULL UNIQUE,
-    event_id     TEXT NOT NULL,
-    event_title  TEXT NOT NULL,
-    name         TEXT NOT NULL,
-    email        TEXT NOT NULL,
-    phone        TEXT NOT NULL,
-    enrollment   TEXT NOT NULL,
-    program      TEXT NOT NULL,
-    branch       TEXT NOT NULL,
-    year         TEXT NOT NULL,
-    team_name    TEXT NOT NULL DEFAULT '',
-    team_size    TEXT NOT NULL DEFAULT '',
-    notes        TEXT NOT NULL DEFAULT '',
-    created_at   TEXT NOT NULL
-  );
-  CREATE UNIQUE INDEX IF NOT EXISTS one_per_event ON registrations (event_id, lower(email));
-`)
-
-const insert = db.prepare(`INSERT INTO registrations
-  (ref, event_id, event_title, name, email, phone, enrollment, program, branch, year, team_name, team_size, notes, created_at)
-  VALUES (@ref, @eventId, @eventTitle, @name, @email, @phone, @enrollment, @program, @branch, @year, @teamName, @teamSize, @notes, @createdAt)`)
+if (!process.env.MONGODB_URI) {
+  console.error('Missing MONGODB_URI. Put your MongoDB connection string in server/.env (see .env.example).')
+  process.exit(1)
+}
+const client = new MongoClient(process.env.MONGODB_URI, { serverSelectionTimeoutMS: 8000 })
+await client.connect().catch((err) => { console.error('Could not connect to MongoDB:', err.message); process.exit(1) })
+const regs = client.db(process.env.MONGODB_DB || 'csi').collection('registrations')
+await regs.createIndex({ ref: 1 }, { unique: true })
+await regs.createIndex({ eventId: 1, emailLower: 1 }, { unique: true }) // one registration per email per event
+console.log('Connected to MongoDB')
 
 const PROGRAMS = ['B.Tech', 'IDD', 'M.Tech', 'M.Sc', 'Ph.D', 'Other']
 const YEARS = ['1st year', '2nd year', '3rd year', '4th year', '5th year', 'Not applicable']
@@ -66,9 +59,11 @@ function validate(b) {
 }
 
 const newRef = () => 'CSI-' + crypto.randomBytes(4).toString('hex').slice(0, 6).toUpperCase()
+const serverError = (res) => res.status(500).json({ error: 'Something went wrong on our side. Please try again.' })
 
 const app = express()
 app.disable('x-powered-by')
+app.set('trust proxy', 1) // so the rate limiter sees the visitor's IP when hosted behind a proxy (Render, Railway, etc.)
 app.use(express.json({ limit: '20kb' }))
 if (ORIGINS.length) app.use(cors({ origin: ORIGINS }))
 
@@ -80,22 +75,23 @@ const limiter = (req, res, next) => {
   list.push(now); hits.set(k, list); next()
 }
 
-app.post('/api/registrations', limiter, (req, res) => {
+app.post('/api/registrations', limiter, async (req, res) => {
   const { d, errors } = validate(req.body ?? {})
   if (Object.keys(errors).length) return res.status(400).json({ errors })
   for (let attempt = 0; attempt < 5; attempt++) {
     const ref = newRef()
     try {
-      insert.run({ ...d, ref, createdAt: new Date().toISOString() })
+      await regs.insertOne({ ref, ...d, emailLower: d.email.toLowerCase(), createdAt: new Date() })
       return res.status(201).json({ ref })
     } catch (err) {
-      const msg = String(err.message)
-      if (msg.includes('registrations.ref')) continue // reference collision, try a new one
-      if (err.code === 'SQLITE_CONSTRAINT_UNIQUE' || msg.includes('UNIQUE')) return res.status(409).json({ error: 'This email is already registered for this event.' })
-      console.error(err); return res.status(500).json({ error: 'Something went wrong on our side. Please try again.' })
+      if (err.code === 11000) {
+        if (err.keyPattern?.ref) continue // reference collision, try a new one
+        return res.status(409).json({ error: 'This email is already registered for this event.' })
+      }
+      console.error(err); return serverError(res)
     }
   }
-  res.status(500).json({ error: 'Something went wrong on our side. Please try again.' })
+  serverError(res)
 })
 
 const admin = (req, res, next) => {
@@ -103,19 +99,21 @@ const admin = (req, res, next) => {
   if (!ADMIN_KEY || given.length !== want.length || !crypto.timingSafeEqual(given, want)) return res.status(401).json({ error: 'Unauthorized' })
   next()
 }
-const rows = (eventId) => eventId
-  ? db.prepare('SELECT * FROM registrations WHERE event_id = ? ORDER BY id').all(String(eventId))
-  : db.prepare('SELECT * FROM registrations ORDER BY id').all()
+const rows = (eventId) => regs.find(eventId ? { eventId: String(eventId) } : {}, { projection: { _id: 0, emailLower: 0 } }).sort({ createdAt: 1 }).toArray()
 
-app.get('/api/registrations', admin, (req, res) => res.json({ count: rows(req.query.eventId).length, registrations: rows(req.query.eventId) }))
+app.get('/api/registrations', admin, async (req, res) => {
+  try { const list = await rows(req.query.eventId); res.json({ count: list.length, registrations: list }) } catch (err) { console.error(err); serverError(res) }
+})
 
-app.get('/api/registrations.csv', admin, (req, res) => {
-  const list = rows(req.query.eventId)
-  const cols = ['ref', 'event_id', 'event_title', 'name', 'email', 'phone', 'enrollment', 'program', 'branch', 'year', 'team_name', 'team_size', 'notes', 'created_at']
-  // prefix cells starting with = + - @ so spreadsheets never run them as formulas
-  const cell = (v) => { let t = String(v ?? ''); if (/^[=+\-@\t\r]/.test(t)) t = "'" + t; return `"${t.replace(/"/g, '""')}"` }
-  const csv = [cols.join(','), ...list.map((r) => cols.map((c) => cell(r[c])).join(','))].join('\r\n')
-  res.set({ 'Content-Type': 'text/csv; charset=utf-8', 'Content-Disposition': 'attachment; filename="registrations.csv"' }).send(csv)
+app.get('/api/registrations.csv', admin, async (req, res) => {
+  try {
+    const list = await rows(req.query.eventId)
+    const cols = ['ref', 'eventId', 'eventTitle', 'name', 'email', 'phone', 'enrollment', 'program', 'branch', 'year', 'teamName', 'teamSize', 'notes', 'createdAt']
+    // prefix cells starting with = + - @ so spreadsheets never run them as formulas
+    const cell = (v) => { let t = v instanceof Date ? v.toISOString() : String(v ?? ''); if (/^[=+\-@\t\r]/.test(t)) t = "'" + t; return `"${t.replace(/"/g, '""')}"` }
+    const csv = [cols.join(','), ...list.map((r) => cols.map((c) => cell(r[c])).join(','))].join('\r\n')
+    res.set({ 'Content-Type': 'text/csv; charset=utf-8', 'Content-Disposition': 'attachment; filename="registrations.csv"' }).send(csv)
+  } catch (err) { console.error(err); serverError(res) }
 })
 
 // Optional: serve the built website (npm run build -> dist) from the same server

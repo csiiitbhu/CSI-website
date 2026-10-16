@@ -4,13 +4,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "dev": "node --env-file=.env index.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
-    "express": "^4.21.0"
+    "express": "^4.21.0",
+    "mongodb": "^6.9.0"
   },
-  "engines": {
-    "node": ">=22.13"
-  }
+  "engines": { "node": ">=20.6" }
 }
