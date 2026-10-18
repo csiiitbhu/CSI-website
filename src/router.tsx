@@ -5,6 +5,7 @@ import Home from './pages/Home'
 import Team from './pages/Team'
 import Events from './pages/Events'
 import Gallery from './pages/Gallery'
+import Register from './pages/Register'
 const root = createRootRoute({
   component: () => (
     <div className="flex min-h-screen flex-col">
@@ -13,6 +14,7 @@ const root = createRootRoute({
   ),
 })
 const page = <P extends string>(path: P, component: () => React.JSX.Element) => createRoute({ getParentRoute: () => root, path, component })
-const routeTree = root.addChildren([page('/', Home), page('/our-team', Team), page('/events', Events), page('/gallery', Gallery)])
+const registerRoute = createRoute({ getParentRoute: () => root, path: '/events/$eventId/register', component: Register })
+const routeTree = root.addChildren([page('/', Home), page('/our-team', Team), page('/events', Events), registerRoute, page('/gallery', Gallery)])
 export const router = createRouter({ routeTree, scrollRestoration: true })
 declare module '@tanstack/react-router' { interface Register { router: typeof router } }
