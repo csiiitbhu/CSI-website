@@ -22,6 +22,7 @@ export type CsiEvent = {
   image?: string        // optional photo URL; a coloured placeholder is shown if empty
   audience?: string     // shown under 'Know more'
   agenda?: string[]     // shown under 'Know more'
+  registerUrl?: string  // optional registration URL
 }
 
 // Dot colour per category, built from the site theme colours in styles.css (also used for the filter chips).
@@ -115,6 +116,12 @@ export const events: CsiEvent[] = [
 
 // Upcoming = dated today or later.
 export const isUpcoming = (ev: CsiEvent, now = new Date()) => new Date(ev.date + 'T23:59:59') >= now
+
+export const daysUntil = (ev: CsiEvent, now = new Date()) => {
+  const d = new Date(ev.date + 'T00:00:00')
+  const diff = d.getTime() - new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
+  return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)))
+}
 
 export const getEvent = (id: string | undefined) => events.find((e) => e.id === id)
 
