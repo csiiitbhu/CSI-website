@@ -1,4 +1,5 @@
 @import "tailwindcss";
+
 /* Semantic design tokens: change colors here */
 @theme {
   --color-background: #faf7f0;
@@ -13,9 +14,103 @@
   --shadow-soft: 0 6px 24px -8px rgb(20 48 43 / 0.15);
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
-body { background: var(--color-background); color: var(--color-foreground); font-family: var(--font-sans); }
-html { scroll-behavior: smooth; }
-:focus-visible { outline: 2px solid var(--color-secondary); outline-offset: 2px; }
-@keyframes pop { from { opacity: 0; transform: scale(.97) } to { opacity: 1; transform: none } }
-.pop { animation: pop .2s ease-out; }
-@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+
+html, body {
+  overflow-x: clip;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 2px;
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.pop {
+  animation: pop .2s ease-out;
+}
+
+/* Vertical wire and node animations */
+.branch {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+
+.play .branch {
+  animation: branch-draw 1.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.play .b1 { animation-delay: 0.3s; }
+.play .b2 { animation-delay: 0.45s; }
+.play .b3 { animation-delay: 0.6s; }
+.play .b4 { animation-delay: 0.75s; }
+
+.node {
+  opacity: 0;
+  transform: scale(0.3);
+}
+
+.play .node {
+  animation: branch-pop 0.6s cubic-bezier(0.3, 1.5, 0.5, 1) forwards;
+  animation-delay: 1.4s;
+}
+
+.dot {
+  transform: scale(0);
+  transform-origin: 200px 200px;
+}
+
+.play .dot {
+  animation: branch-pop 0.5s ease forwards;
+}
+
+@keyframes branch-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes branch-pop {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+  .branch {
+    stroke-dashoffset: 0 !important;
+    animation: none !important;
+  }
+  .node,
+  .dot {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+}

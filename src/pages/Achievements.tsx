@@ -141,10 +141,10 @@ const Achievements = () => {
       {/* --- 2. STICKY PEELING CARD DECK SECTION --- */}
       <section
         ref={stackContainerRef}
-        style={{ height: `${totalCards * 110}vh` }}
+        style={{ height: `${totalCards * 65}vh` }}
         className="relative w-full"
       >
-        <div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-10">
+        <div className="sticky top-0 h-screen pt-14 sm:pt-16 w-full flex items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-10">
           
           {/* Right-Side Quick Progress Dots */}
           <div className="hidden xl:flex fixed right-8 top-1/2 -translate-y-1/2 z-40 flex-col gap-3">
@@ -163,21 +163,24 @@ const Achievements = () => {
           </div>
 
           {/* The Deck Container */}
-          <div className="relative w-full max-w-[1140px] h-[540px] sm:h-[560px] md:h-[540px]">
+          <div className="relative w-full max-w-[1140px] h-[480px] sm:h-[500px] md:h-[520px] max-h-[72vh]">
             {dummyAchievements.map((card, index) => {
               const cardProgress = activeFloat - index;
               let translateY = '0px';
               let scale = 1;
+              let opacity = 1;
 
               if (cardProgress > 0) {
-                const peelPercent = Math.min(cardProgress, 1.3) * 118;
+                const peelPercent = Math.min(cardProgress, 1) * 105;
                 translateY = `-${peelPercent}%`;
                 scale = 1;
+                opacity = Math.max(0, 1 - cardProgress * 1.2);
               } else {
                 const depth = Math.max(0, -cardProgress);
-                const peekOffsetPx = depth * 18; 
+                const peekOffsetPx = depth * 12; 
                 scale = Math.max(0.88, 1 - depth * 0.025);
                 translateY = `${peekOffsetPx}px`;
+                opacity = 1;
               }
 
               return (
@@ -187,7 +190,8 @@ const Achievements = () => {
                     zIndex: totalCards - index,
                     transform: `translate3d(0, ${translateY}, 0) scale(${scale})`,
                     transformOrigin: 'bottom center',
-                    willChange: 'transform',
+                    opacity,
+                    willChange: 'transform, opacity',
                   }}
                   className={`absolute inset-0 w-full h-full ${card.bgColor} text-primary-foreground rounded-[2rem] md:rounded-[2.5rem] p-6 sm:p-10 md:p-12 shadow-soft flex flex-col md:flex-row gap-6 md:gap-10 justify-between overflow-hidden select-none border border-white/10`}
                 >
