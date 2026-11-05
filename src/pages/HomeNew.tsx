@@ -1,9 +1,10 @@
 import usePageMeta from '../components/usePageMeta'
 import Section from '../components/Section'
 import SocialLinks from '../components/SocialLinks'
-import WaveBackground from '../components/WaveBackground'
 import VerticalNav from '../components/VerticalNav'
 import { site } from '../data/site'
+import waterColor from '../assets/waterColor.png'
+import leaf from '../assets/leaf.png'
 
 export default function HomeNew() {
   usePageMeta(
@@ -13,11 +14,32 @@ export default function HomeNew() {
 
   return (
     <>
-      {/* Hero Section with animated sine wave background */}
-      <section className="relative isolate flex min-h-[85vh] items-center overflow-hidden">
-        <WaveBackground />
+      {/* Hero Section with watercolor background */}
+      <section className="relative isolate flex min-h-[85vh] items-center">
+        {/* Fully opaque watercolor background */}
+        <div
+          className="absolute inset-0 -z-10 bg-cover bg-center bg-repeat"
+          style={{ backgroundImage: `url(${waterColor})` }}
+        />
+
+        {/* Leaf 1: Centered on the top-right corner, large enough to slightly cover hero and overflow bounds */}
+        <img
+          src={leaf}
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none absolute top-0 right-0 z-10 w-72 sm:w-96 md:w-[28rem] lg:w-[34rem] xl:w-[40rem] translate-x-1/2 -translate-y-1/2 select-none drop-shadow-2xl rotate-[70deg]"
+        />
+
+        {/* Leaf 2: Centered on the bottom-left corner, large enough to slightly cover hero and overflow bounds */}
+        <img
+          src={leaf}
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none absolute bottom-0 left-0 z-10 w-72 sm:w-96 md:w-[28rem] lg:w-[34rem] xl:w-[40rem] -translate-x-1/2 translate-y-1/2 select-none drop-shadow-2xl -rotate-[100deg]"
+        />
+
         <div className="mx-auto max-w-6xl px-4 py-20">
-          <div className="max-w-2xl rounded-3xl border border-border/60 bg-background/75 p-6 shadow-soft backdrop-blur-md sm:p-10">
+          <div className="max-w-2xl rounded-3xl border border-border/60 bg-background/85 p-6 shadow-soft backdrop-blur-md sm:p-10">
             <p className="text-sm font-semibold uppercase tracking-widest text-secondary">
               Build green. Think bold.
             </p>
@@ -43,7 +65,7 @@ export default function HomeNew() {
       </section>
 
       {/* Scroll-triggered Vertical Navigation */}
-      <div id="verticals">
+      <div id="verticals" className="relative overflow-hidden">
         <VerticalNav />
       </div>
 

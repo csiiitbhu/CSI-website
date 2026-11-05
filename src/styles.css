@@ -97,11 +97,33 @@ html {
   }
 }
 
+/* Pulsating concentric circles animation */
+@keyframes pulse-concentric {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 0.3;
+  }
+}
+
+.animate-pulse-concentric {
+  animation: pulse-concentric 4s ease-in-out infinite;
+  transform-origin: center center;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;
     transition: none !important;
     scroll-behavior: auto !important;
+  }
+  .animate-pulse-concentric {
+    animation: none !important;
+    transform: scale(1) !important;
+    opacity: 0.5 !important;
   }
   .branch {
     stroke-dashoffset: 0 !important;
